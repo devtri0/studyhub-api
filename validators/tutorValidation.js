@@ -1,141 +1,105 @@
 import Joi from "joi";
 
-const subjectList = [
-  "Mathematics",
-  "English",
-  "Science",
-  "Social Studies",
-  "ICT",
-  "Integrated Science",
-  "Physics",
-  "Chemistry",
-  "Biology",
-  "Economics",
-  "Accounting",
-  "Business",
-  "Geography",
-  "History",
-  "Government",
-  "French",
-  "Ga",
-  "Twi",
-  "Ewe",
-  "Fante",
-  "Other",
-];
+export const tutorProfileValidator = Joi.object({
 
-const regionList = [
-  "Greater Accra",
-  "Ashanti",
-  "Western",
-  "Central",
-  "Eastern",
-  "Volta",
-  "Northern",
-  "Upper East",
-  "Upper West",
-  "Bono",
-  "Ahafo",
-  "Bono East",
-  "Oti",
-  "Western North",
-  "Savannah",
-  "North East",
-];
+  specialization: Joi.array()
+    .items(Joi.string().min(3).max(100))
+    .min(1)
+    .required(),
 
-export const tutorProfileSchema = Joi.object({
+  languages: Joi.array().items(Joi.string().min(2).max(30)).min(1).required(),
+
+  education: Joi.array().items(Joi.string().min(5).max(200)).min(1).required(),
+
+  experience: Joi.array()
+    .items(Joi.string().min(10).max(500))
+    .min(1)
+    .required(),
+
+  location: Joi.object({
+    type: Joi.string().valid("Point").default("Point"),
+    gpsAddress: Joi.array()
+      .items(
+        Joi.string().required(),
+        Joi.string().required()
+      ).required(),
+
+    address: Joi.string().max(200),
+    city: Joi.string().max(100),
+    region: Joi.string().max(100),
+  }).required(),
+
+  bio: Joi.string().max(500),
+  ratingsAverage: Joi.number().min(1).max(5).default(4.5),
+  ratingsQuantity: Joi.number().integer().min(0).default(0),
+  isVerified: Joi.boolean().default(false),
+});
+
+export const tutorProfileUpdateValidator = tutorProfileValidator
+
+
+// regex for time format validation
+const timeFormatRegex = /^([1-9]|1[0-2])(:\d{2})? (AM|PM)$/i;
+
+export const tutorAvailabilityValidator = Joi.object({
+  generalAvailability: Joi.object({
+    weekdays: Joi.object({
+      start: Joi.string().pattern(timeFormatRegex).required(),
+      end: Joi.string().pattern(timeFormatRegex).required()
+    }).required(),
+    weekends: Joi.object({
+      start: Joi.string().pattern(timeFormatRegex).required(),
+      end: Joi.string().pattern(timeFormatRegex).required()
+    }).required(),
+    notes: Joi.string().max(500)
+  }).required(),
+  
+  specificSlots: Joi.array().items(
+    Joi.object({
+      day: Joi.string().valid("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun").required(),
+      date: Joi.number().integer().min(1).max(31),
+      slots: Joi.array().items(
+        Joi.object({
+          start: Joi.string().pattern(timeFormatRegex).required(),
+          end: Joi.string().pattern(timeFormatRegex).required()
+        })
+      ).min(1).required()
+    })
+  )
+});
+
+export const tutorAvailabilityUpdateValidator = tutorAvailabilityValidator;
+
+
+export const tutorStyleValidator = Joi.object({
+  teachingStyle: Joi.string()
+    .valid(
+      "Student-Centered Learning",
+      "Interactive Methods",
+      "Engaging Methods",
+      "Personalized Approaches",
+      "Knowledge Empowerment"
+    )
+    .required(),
+
   subjects: Joi.array()
-    .items(Joi.string().valid(...subjectList))
-    .min(1)
-    .required()
-    .messages({
-      "array.base": "Subjects should be an array",
-      "array.min": "Please select at least one subject",
-      "any.only": "Invalid subject selected",
-      "any.required": "Subjects are required",
-    }),
-
-  levels: Joi.array()
-    .items(Joi.string().valid("JHS", "SHS", "Tertiary"))
-    .min(1)
-    .required()
-    .messages({
-      "array.base": "Education levels should be an array",
-      "array.min": "Please select at least one education level",
-      "any.only": "Invalid education level selected",
-      "any.required": "Education levels are required",
-    }),
-
-  qualifications: Joi.array()
-    .items(Joi.string().min(5).max(100))
-    .min(1)
-    .required()
-    .messages({
-      "array.base": "Qualifications should be an array",
-      "array.min": "Please add at least one qualification",
-      "string.min": "Qualification should be at least {#limit} characters",
-      "string.max": "Qualification should not exceed {#limit} characters",
-      "any.required": "Qualifications are required",
-    }),
-
-  experience: Joi.number().integer().min(0).max(50).required().messages({
-    "number.base": "Experience should be a number",
-    "number.integer": "Experience should be a whole number",
-    "number.min": "Experience cannot be negative",
-    "number.max": "Experience seems unrealistically high",
-    "any.required": "Experience is required",
-  }),
-
-  hourlyRate: Joi.number().min(10).max(500).required().messages({
-    "number.base": "Hourly rate should be a number",
-    "number.min": "Hourly rate cannot be less than GHS 10",
-    "number.max": "Hourly rate cannot exceed GHS 500",
-    "any.required": "Hourly rate is required",
-  }),
-
-  availability: Joi.array()
     .items(
       Joi.object({
-        day: Joi.string()
+        name: Joi.string()
           .valid(
-            "Monday",
-            "Tuesday",
-            "Wednesday",
-            "Thursday",
-            "Friday",
-            "Saturday",
-            "Sunday"
+            "Mathematics", "English", "Science", "Social Studies", "ICT",
+            "Integrated Science", "Physics", "Chemistry", "Biology", "Economics",
+            "Accounting", "Business", "Geography", "History", "Government",
+            "French", "Ga", "Twi", "Ewe", "Fante", "Other"
           )
           .required(),
-        times: Joi.array()
-          .items(Joi.string().pattern(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/))
-          .min(1),
+        level: Joi.string()
+          .valid("Beginner", "Intermediate", "Advanced")
+          .default("Intermediate")
       })
     )
     .min(1)
-    .messages({
-      "array.base": "Availability should be an array",
-      "array.min": "Please add at least one available day",
-      "string.pattern.base": "Time should be in HH:MM format",
-      "any.required": "Day is required",
-    }),
-
-  location: Joi.object({
-    coordinates: Joi.array()
-      .items(
-        Joi.string().min(-180).max(180).required(),
-        Joi.string().min(-90).max(90).required()
-      )
-      .length(2)
-      .required(),
-    city: Joi.string().required(),
-    region: Joi.string()
-      .valid(...regionList)
-      .required(),
-  }).required(),
-
-  bio: Joi.string().min(20).max(500).messages({
-    "string.min": "Bio should be at least {#limit} characters",
-    "string.max": "Bio cannot exceed {#limit} characters",
-  }),
+    .required()
 });
+
+export const tutorStyleUpdateValidator = tutorStyleValidator;

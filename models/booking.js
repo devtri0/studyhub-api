@@ -6,52 +6,54 @@ const BookingSchema = new mongoose.Schema(
     student: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: [true, "Booking must belong to a student"],
+      required: true,
     },
     tutor: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: [true, "Booking must belong to a tutor"],
+      required: true,
     },
     subject: {
       type: String,
-      required: [true, "Please specify the subject"],
+      required: true,
+      trim: true,
     },
     date: {
       type: Date,
-      required: [true, "Please provide booking date"],
+      required: true,
     },
-    startTime: {
-      type: String,
-      required: [true, "Please provide start time"],
-    },
-    endTime: {
-      type: String,
-      required: [true, "Please provide end time"],
+    timeSlot: {
+      start: { type: String, required: true }, // "HH:MM" format
+      end: { type: String, required: true },
     },
     status: {
       type: String,
-      enum: ["pending", "confirmed", "cancelled", "completed"],
+      enum: ["pending", "confirmed", "rejected", "completed"],
       default: "pending",
     },
-    meetingLink: {
-      type: String,
-    },
-    paymentStatus: {
-      type: String,
-      enum: ["pending", "paid", "failed", "refunded"],
-      default: "pending",
-    },
-    amount: {
-      type: Number,
-      required: [true, "Please specify the amount"],
+    meetingDetails: {
+      platform: {
+        type: String,
+        enum: ["Zoom", "Google Meet", "Skype", "Other"],
+        default: "Zoom",
+      },
+      link: {
+        type: String,
+        trim: true,
+      },
+      instructions: {
+        type: String,
+        trim: true,
+      },
     },
   },
   {
     timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
   }
 );
 
 BookingSchema.plugin(normalize);
 
-export default mongoose.model("Booking", BookingSchema);
+export const Booking = mongoose.model("Booking", BookingSchema);

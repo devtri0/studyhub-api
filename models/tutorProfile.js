@@ -1,48 +1,39 @@
 import mongoose from "mongoose";
 import normalize from "normalize-mongoose";
 
-const tutorSchema = new mongoose.Schema(
+const tutorProfileSchema = new mongoose.Schema(
   {
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: [true, "Tutor must belong to a user"],
+      required: true,
       unique: true,
     },
-    subjects: {
+
+    specialization: {
       type: [String],
-      required: [true, "Please add at least one subject"],
+      required: true,
     },
-    levels: {
+    languages: {
       type: [String],
-      required: [true, "Please specify education levels"],
+      required: true,
     },
-    qualifications: {
+    education: {
       type: [String],
-      required: [true, "Please add qualifications"],
+      required: true,
     },
     experience: {
-      type: Number,
-      required: [true, "Please add years of experience"],
+      type: [String],
+      required: true,
     },
-    hourlyRate: {
-      type: Number,
-      required: [true, "Please add an hourly rate"],
-    },
-    availability: [
-      {
-        day: String,
-        times: [String],
-      },
-    ],
     location: {
       type: {
         type: String,
         default: "Point",
         enum: ["Point"],
       },
-      coordinates: {
-        type: [GPS],
+      gpsAddress: {
+        type: [String],
         required: true,
       },
       address: String,
@@ -63,18 +54,14 @@ const tutorSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
-    isVerified: {
-      type: Boolean,
-      default: false,
-    },
   },
   {
     timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
   }
 );
 
-tutorSchema.index({ location: "2dsphere" });
+tutorProfileSchema.plugin(normalize);
 
-tutorSchema.plugin(normalize);
-
-export default mongoose.model("Tutor", tutorSchema);
+export const tutorProfile = mongoose.model("Tutor", tutorProfileSchema);
