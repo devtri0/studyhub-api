@@ -1,7 +1,7 @@
-import mongoose from "mongoose";
+import { Schema, model } from "mongoose";
 import normalize from "normalize-mongoose";
 
-const userSchema = new mongoose.Schema(
+const UserSchema = new Schema(
   {
     firstName: {
       type: String,
@@ -43,10 +43,19 @@ const userSchema = new mongoose.Schema(
     photo: { type: String, default: "default.jpg" },
 
     isVerified: { type: Boolean, default: false },
+
+    verificationToken: {
+      type: String,
+      select: false, 
+    },
+    verificationTokenExpires: {
+      type: Date,
+      select: false,
+    },
   },
   { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
 );
 
-userSchema.plugin(normalize);
+UserSchema.plugin(normalize);
 
-export default mongoose.model("user", userSchema);
+export const User = model("User", UserSchema);

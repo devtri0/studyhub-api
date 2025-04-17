@@ -1,7 +1,12 @@
 import express from "express";
-import mongoose from "mongoose";
 import cors from "cors";
 import "dotenv/config";
+import authRouter from "./routes/authRoutes.js";
+import tutorRouter from "./routes/tutorRoutes.js";
+import avaRouter from "./routes/tutorAvailabiltyRoute.js";
+import styleRouter from "./routes/tutorStyleRoute.js";
+import bookingRouter from "./routes/bookingRoutes.js";
+import studentRouter from "./routes/studentRoutes.js";
 
 // Database connection
 import connectDB from "./config/db.js";
@@ -14,8 +19,11 @@ app.use(cors());
 app.use(express.json());
 
 // Routes
-
-// Error handling middleware
-
+app.use(authRouter);
+app.use(tutorRouter);
+app.use(studentRouter);
+app.use(avaRouter);
+app.use(styleRouter);
+app.use(bookingRouter);
 
 export default app;
