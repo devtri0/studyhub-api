@@ -74,11 +74,17 @@ export const tutorAvailabilityUpdateValidator = tutorAvailabilityValidator;
 export const tutorStyleValidator = Joi.object({
   teachingStyle: Joi.string()
     .valid(
-      "Student-Centered Learning",
+      "Student-Centered",
       "Interactive Methods",
       "Engaging Methods",
       "Personalized Approaches",
-      "Knowledge Empowerment"
+      "Knowledge Empowerment",
+      "Visual Learning",
+      "Hands-on Practice",
+      "Discussion Based",
+      "Problem Solving",
+      "Lecture Style",
+      "Game Based"
     )
     .required(),
 
@@ -94,8 +100,8 @@ export const tutorStyleValidator = Joi.object({
           )
           .required(),
         level: Joi.string()
-          .valid("Beginner", "Intermediate", "Advanced")
-          .default("Intermediate")
+          .valid("JHS", "SHS", "Tertiary")
+          .default("SHS")
       })
     )
     .min(1)

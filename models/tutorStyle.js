@@ -14,11 +14,17 @@ const tutorSchema = new mongoose.Schema(
       type: String,
       required: true,
       enum: [
-        "Student-Centered Learning",
+        "Student-Centered",
         "Interactive Methods",
         "Engaging Methods",
         "Personalized Approaches",
         "Knowledge Empowerment",
+        "Visual Learning",
+        "Hands-on Practice",
+        "Discussion Based",
+        "Problem Solving",
+        "Lecture Style",
+        "Game Based"
       ],
     },
     subjects: [
@@ -52,8 +58,8 @@ const tutorSchema = new mongoose.Schema(
         },
         level: {
           type: String,
-          enum: ["Beginner", "Intermediate", "Advanced"],
-          default: "Intermediate",
+          enum: ["JHS", "SHS", "Tertiary"],
+          default: "SHS",
         },
       },
     ],

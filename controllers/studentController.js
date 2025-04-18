@@ -4,6 +4,55 @@ import { tutorProfile } from "../models/tutorProfile.js";
 import { TutorStyle } from "../models/tutorStyle.js";
 import { User } from "../models/user.js";
 
+
+
+// Get all tutors
+export const getAllTutors = async (req, res) => {
+  try {
+    // Find users with role "tutor"
+    const tutors = await User.find({ role: "tutor" })
+      .select("-password -verificationToken -verificationTokenExpires")
+      .lean(); 
+
+    // Fetch corresponding tutor subject details
+    const tutorDetails = await TutorStyle.find({ user: { $in: tutors.map(t => t._id) } })
+      .select("user subjects teachingStyle")
+      .populate("user", "firstName lastName email photo");
+
+    // Create a map of tutor subjects by user ID
+    const subjectMap = tutorDetails.reduce((acc, curr) => {
+      acc[curr.user._id.toString()] = {
+        subjects: curr.subjects,
+        teachingStyle: curr.teachingStyle,
+      };
+      return acc;
+    }, {});
+
+    // Merge user data with subject data
+    const enrichedTutors = tutors.map((tutor) => {
+      const details = subjectMap[tutor._id.toString()] || {};
+      return {
+        ...tutor,
+        ...details,
+      };
+    });
+
+    res.status(200).json({
+      success: true,
+      count: enrichedTutors.length,
+      data: enrichedTutors,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Server error. Failed to fetch tutors.",
+      error: error.message,
+    });
+  }
+};
+
+
+
 export const getFullTutorInfo = async (req, res) => {
   const { tutorId } = req.params;
 
