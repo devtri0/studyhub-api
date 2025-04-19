@@ -1,5 +1,6 @@
 import { Router } from "express";
 import {
+  getAuthenticatedUser,
   loginUser,
   registerUser,
   verifyEmail,
@@ -18,7 +19,14 @@ authRouter.post("/verify-email", verifyEmail);
 
 authRouter.get("/verify-email", verifyEmail);
 
-authRouter.patch("/update/profile", isAuthenticated, photo.single("photo"), updateUserProfile);
+authRouter.get("/users/me", isAuthenticated, getAuthenticatedUser);
+
+authRouter.patch(
+  "/update/profile",
+  isAuthenticated,
+  photo.single("photo"),
+  updateUserProfile
+);
 
 // // Resend verification email
 // authRouter.post("/resend-verification", resendVerificationEmail);
