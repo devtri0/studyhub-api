@@ -2,7 +2,6 @@ import express from "express";
 import { isAuthenticated, isAuthorized } from "../middleware/auth.js";
 import {
   createTutorProfile,
-  getAuthTutorInfo,
   getTutorProfile,
   updateTutorProfile,
 } from "../controllers/tutorController.js";
@@ -31,11 +30,5 @@ tutorRouter.patch(
   updateTutorProfile
 );
 
-tutorRouter.get(
-  "/tutors/me/:id",
-  isAuthenticated,
-  isAuthorized(["tutor", "admin"]),
-  getAuthTutorInfo
-);
 
 export default tutorRouter;

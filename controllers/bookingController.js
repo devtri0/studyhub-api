@@ -185,7 +185,7 @@ export const updateBookingStatus = async (req, res) => {
   // Get user's bookings
   export const getUserBookings = async (req, res) => {
     try {
-      const userId = req.auth._id;
+      const userId = req.auth.id;
       const { status, page = 1, limit = 10 } = req.query;
   
       const query = {
@@ -206,13 +206,13 @@ export const updateBookingStatus = async (req, res) => {
         success: true,
         message: "Bookings retrieved successfully",
         data: bookings.map(booking => ({
-          id: booking._id,
+          id: booking.id,
           tutor: {
-            id: booking.tutor._id,
+            id: booking.tutor.id,
             name: `${booking.tutor.firstName} ${booking.tutor.lastName}`
           },
           student: {
-            id: booking.student._id,
+            id: booking.student.id,
             name: `${booking.student.firstName} ${booking.student.lastName}`
           },
           subject: booking.subject,
@@ -239,4 +239,26 @@ export const updateBookingStatus = async (req, res) => {
       });
     }
   };
-  
+
+  // export const getTutorBookings = async (req, res) => {
+  //   try {
+  //     // Get ALL bookings temporarily
+  //     const allBookings = await Booking.find()
+  //       .populate('student tutor')
+  //       .lean();
+      
+  //     // Filter manually
+  //     const filtered = allBookings.filter(b => 
+  //       b.tutor?.id?.toString() === req.params.userId || 
+  //       b.tutor?.toString() === req.params.userId
+  //     );
+      
+  //     res.json({
+  //       success: true,
+  //       count: filtered.length,
+  //       data: filtered
+  //     });
+  //   } catch (error) {
+  //     res.status(500).json({ error: error.toString() });
+  //   }
+  // };
