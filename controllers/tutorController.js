@@ -1,5 +1,10 @@
 import { tutorProfile } from "../models/tutorProfile.js";
 import { tutorProfileUpdateValidator, tutorProfileValidator, } from "../validators/tutorValidation.js";
+import { TutorAvailability } from "../models/tutorAvailability.js";
+
+import { TutorStyle } from "../models/tutorStyle.js";
+import { User } from "../models/user.js";
+
 
 
 // create tutor profile: 1st section
@@ -119,5 +124,36 @@ export const updateTutorProfile = async (req, res) => {
       success: false,
       message: "Internal server error",
     });
+  }
+};
+
+export const getAuthTutorInfo = async (req, res) => {
+  const { tutorId } = req.params;
+
+  try {
+    // Get tutor 
+    const tutor = await User.findById(tutorId).lean();
+    if (!tutor) return res.status(404).json({ message: 'Tutor not found' });
+
+    const tutorObjectId = new mongoose.Types.ObjectId(tutorId);
+
+    // query the related documents 
+    const [profile, availability, style] = await Promise.all([
+      tutorProfile.findOne({ user: tutorObjectId }).lean(),
+      TutorAvailability.findOne({ user: tutorObjectId }).lean(),
+      TutorStyle.findOne({ user: tutorObjectId }).lean(),
+    ]);
+
+    const fullTutorInfo = {
+      ...tutor,
+      profile,
+      availability,
+      style,
+    };
+
+    res.status(200).json(fullTutorInfo);
+  } catch (error) {
+    console.error('Error fetching full tutor info:', error.message);
+    res.status(500).json({ message: 'Server error' });
   }
 };
