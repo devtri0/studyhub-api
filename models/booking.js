@@ -23,7 +23,7 @@ const BookingSchema = new mongoose.Schema(
       required: true,
     },
     timeSlot: {
-      start: { type: String, required: true }, // "HH:MM" format
+      start: { type: String, required: true }, 
       end: { type: String, required: true },
     },
     status: {
