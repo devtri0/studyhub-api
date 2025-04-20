@@ -7,9 +7,9 @@ export const tutorProfileValidator = Joi.object({
     .min(1)
     .required(),
 
-  languages: Joi.array().items(Joi.string().min(2).max(30)).min(1).required(),
+  languages: Joi.array().items(Joi.string()).required(),
 
-  education: Joi.array().items(Joi.string().min(5).max(200)).min(1).required(),
+  education: Joi.array().items(Joi.string()).required(),
 
   experience: Joi.array()
     .items(Joi.string().min(10).max(500))
@@ -24,32 +24,29 @@ export const tutorProfileValidator = Joi.object({
         Joi.string().required()
       ).required(),
 
-    address: Joi.string().max(200),
-    city: Joi.string().max(100),
-    region: Joi.string().max(100),
+    address: Joi.string(),
+    city: Joi.string(),
+    region: Joi.string()
   }).required(),
 
   bio: Joi.string().max(500),
-  ratingsAverage: Joi.number().min(1).max(5).default(4.5),
-  ratingsQuantity: Joi.number().integer().min(0).default(0),
+  ratingsAverage: Joi.number().default(4.5),
+  ratingsQuantity: Joi.number().default(0),
   isVerified: Joi.boolean().default(false),
 });
 
 export const tutorProfileUpdateValidator = tutorProfileValidator
 
 
-// regex for time format validation
-const timeFormatRegex = /^([1-9]|1[0-2])(:\d{2})? (AM|PM)$/i;
-
 export const tutorAvailabilityValidator = Joi.object({
   generalAvailability: Joi.object({
     weekdays: Joi.object({
-      start: Joi.string().pattern(timeFormatRegex).required(),
-      end: Joi.string().pattern(timeFormatRegex).required()
+      start: Joi.string().required(),
+      end: Joi.string().required()
     }).required(),
     weekends: Joi.object({
-      start: Joi.string().pattern(timeFormatRegex).required(),
-      end: Joi.string().pattern(timeFormatRegex).required()
+      start: Joi.string().required(),
+      end: Joi.string().required()
     }).required(),
     notes: Joi.string().max(500)
   }).required(),
@@ -57,13 +54,13 @@ export const tutorAvailabilityValidator = Joi.object({
   specificSlots: Joi.array().items(
     Joi.object({
       day: Joi.string().valid("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun").required(),
-      date: Joi.number().integer().min(1).max(31),
+      date: Joi.number(),
       slots: Joi.array().items(
         Joi.object({
-          start: Joi.string().pattern(timeFormatRegex).required(),
-          end: Joi.string().pattern(timeFormatRegex).required()
+          start: Joi.string().required(),
+          end: Joi.string().required()
         })
-      ).min(1).required()
+      ).required()
     })
   )
 });
