@@ -33,6 +33,6 @@ export const loginUserValidator = Joi.object({
 export const updateUserValidator = Joi.object({
   firstName: Joi.string().trim().optional(),
   lastName: Joi.string().trim().optional(),
-  photo: Joi.string().required(),
+  photo: Joi.string().optional(),
   phone: Joi.string().trim().optional(),
 });
