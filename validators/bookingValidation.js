@@ -6,8 +6,8 @@ export const createBookingValidator = Joi.object({
   subject: Joi.string().trim().required(),
   date: Joi.date().required(),
   timeSlot: Joi.object({
-    start: Joi.string().pattern(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/).required(), 
-    end: Joi.string().pattern(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/).required(),
+    start: Joi.string().required(), 
+    end: Joi.string().required(),
   }).required(),
   status: Joi.string().valid("pending", "confirmed", "rejected", "completed"),
   meetingDetails: Joi.object({

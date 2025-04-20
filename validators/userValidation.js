@@ -4,23 +4,19 @@ export const registerUserValidator = Joi.object({
   firstName: Joi.string()
     .min(3)
     .max(50)
-    .pattern(/^[A-Za-z\s]+$/)
     .required(),
 
   lastName: Joi.string()
     .min(3)
     .max(50)
-    .pattern(/^[A-Za-z\s]+$/)
     .required(),
 
   email: Joi.string().email().required(),
 
   phone: Joi.string()
-    .pattern(/^\+?233\d{9}$|^0\d{9}$/)
     .required(),
 
   password: Joi.string()
-    .min(8)
     .pattern(
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/
     )
