@@ -24,8 +24,5 @@ export const updateBookingValidator = Joi.object({
     then: Joi.required(),
     otherwise: Joi.optional()
   })
-  .messages({
-    "string.uri": "Meeting link must be a valid URL"
-  })
 });
 

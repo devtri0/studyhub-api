@@ -16,14 +16,14 @@ bookingRouter.use(isAuthenticated);
 
 // Book a specific tutor
 bookingRouter.post(
-  "/book/:Id",
+  "/book/:tutorId",
   isAuthorized(["tutor", "student"]),
   createBooking
 );
 
 // Manage booking status
 bookingRouter.patch(
-  "/manage/:Id",
+  "/manage/:bookingId",
   isAuthorized(["tutor", "student"]),
   updateBookingStatus
 );
