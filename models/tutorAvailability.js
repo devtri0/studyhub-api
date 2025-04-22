@@ -12,14 +12,14 @@ const tutorAvailabilitySchema = new mongoose.Schema(
 
     generalAvailability: {
       weekdays: {
-        start: { type: String, required: true }, // "3 PM"
-        end: { type: String, required: true }, // "8 PM"
+        start: { type: String, required: true }, 
+        end: { type: String, required: true }, 
       },
       weekends: {
-        start: { type: String, required: true }, // "10 AM"
-        end: { type: String, required: true }, // "5 PM"
+        start: { type: String, required: true }, 
+        end: { type: String, required: true }, 
       },
-      notes: String, // "Get in touch if you need to discuss scheduling other times!"
+      notes: String, 
     },
     
     specificSlots: [
@@ -29,11 +29,11 @@ const tutorAvailabilitySchema = new mongoose.Schema(
           required: true,
           enum: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
         },
-        date: Number, // Optional day number (e.g., Mon 1 = 1)
+        date: Number, 
         slots: [
           {
-            start: { type: String, required: true }, // "3 PM"
-            end: { type: String, required: true }, // "4 PM"
+            start: { type: String, required: true }, 
+            end: { type: String, required: true }, 
           },
         ],
       },

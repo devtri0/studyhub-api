@@ -3,11 +3,8 @@ import { User } from "../models/user.js";
 import { sendEmail } from "../utils/mailing.js";
 import { createBookingValidator, updateBookingValidator } from "../validators/bookingValidation.js";
 
-
-// Create a new booking
 export const createBooking = async (req, res) => {
   try {
-    // Validate request body (student and tutor will be injected later)
     const { error, value } = createBookingValidator.validate(req.body);
     if (error) {
       return res.status(422).json({
@@ -24,11 +21,11 @@ export const createBooking = async (req, res) => {
     if (!studentId) {
       return res.status(401).json({
         success: false,
-        message: "Unauthorized. Student ID not found in auth context."
+        message: "Unauthorized. Student ID not found in auth context.",
       });
     }
 
-    // Verify tutor exists and is actually a tutor
+    // 🛠 FIXED: Use `_id` instead of `id`
     const tutor = await User.findOne({ _id: tutorId, role: "tutor" });
     if (!tutor) {
       return res.status(404).json({
@@ -37,13 +34,12 @@ export const createBooking = async (req, res) => {
       });
     }
 
-    // Check for existing bookings at the same time
     const existingBooking = await Booking.findOne({
       tutor: tutorId,
       date,
       "timeSlot.start": timeSlot.start,
       "timeSlot.end": timeSlot.end,
-      status: { $nin: ["cancelled", "rejected"] }
+      status: { $nin: ["cancelled", "rejected"] },
     });
 
     if (existingBooking) {
@@ -53,20 +49,19 @@ export const createBooking = async (req, res) => {
         conflictingBooking: {
           id: existingBooking._id,
           date: existingBooking.date,
-          time: `${existingBooking.timeSlot.start}-${existingBooking.timeSlot.end}`
-        }
+          time: `${existingBooking.timeSlot.start}-${existingBooking.timeSlot.end}`,
+        },
       });
     }
 
-    // Create new booking
     const bookingPayload = {
       student: studentId,
-      tutor: tutorId,
+      tutor: tutorId, // 🛠 No issues here — passed from req.params
       subject,
       date,
       timeSlot,
       meetingDetails,
-      status: "pending"
+      status: "pending",
     };
 
     const newBooking = await Booking.create(bookingPayload);
@@ -84,7 +79,84 @@ export const createBooking = async (req, res) => {
     await sendEmail(
       tutor.email,
       "New Booking Request",
-      `You have a new booking request from ${student.firstName} ${student.lastName} for ${subject} on ${date} from ${timeSlot.start} to ${timeSlot.end}.`
+      `
+      <!DOCTYPE html>
+      <html>
+      <head>
+          <meta charset="UTF-8">
+          <title>New Booking Request Notification</title>
+          <style>
+              body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
+              .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+              .header { background-color: #001f3f; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }
+              .header h1 { color: white; margin: 0; font-size: 24px; }
+              .content { padding: 30px; background-color: #f9f9f9; border-radius: 0 0 8px 8px; border: 1px solid #e1e1e1; }
+              .booking-details { background-color: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #001f3f; }
+              .detail-row { margin-bottom: 10px; }
+              .detail-label { font-weight: bold; color: #001f3f; display: inline-block; width: 120px; }
+              .cta-button { display: inline-block; background-color: #001f3f; color: white !important; text-decoration: none; padding: 12px 24px; border-radius: 4px; font-weight: bold; margin: 20px 0; }
+              .footer { text-align: center; margin-top: 30px; font-size: 12px; color: #777; }
+              .student-info { background-color: #f0f7ff; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+          </style>
+      </head>
+      <body>
+          <div class="container">
+              <div class="header">
+                  <h1>TutorConnect - New Booking Request</h1>
+              </div>
+              <div class="content">
+                  <p>Hello ${tutor.firstName},</p>
+                  <div class="student-info">
+                      <p><strong>You have a new booking request from:</strong></p>
+                      <p>${student.firstName} ${student.lastName} (${student.email})</p>
+                  </div>
+                  <div class="booking-details">
+                      <h2 style="color: #001f3f; margin-top: 0;">Booking Details</h2>
+                      <div class="detail-row">
+                          <span class="detail-label">Subject:</span>
+                          <span>${subject}</span>
+                      </div>
+                      <div class="detail-row">
+                          <span class="detail-label">Date:</span>
+                          <span>${new Date(date).toLocaleDateString()}</span>
+                      </div>
+                      <div class="detail-row">
+                          <span class="detail-label">Time:</span>
+                          <span>${timeSlot.start} - ${timeSlot.end}</span>
+                      </div>
+                      <div class="detail-row">
+                          <span class="detail-label">Meeting Platform:</span>
+                          <span>${meetingDetails?.platform || 'Zoom'}</span>
+                      </div>
+                      ${meetingDetails?.link ? `
+                      <div class="detail-row">
+                          <span class="detail-label">Meeting Link:</span>
+                          <span><a href="${meetingDetails.link}" target="_blank">Join Meeting</a></span>
+                      </div>
+                      ` : ''}
+                      ${meetingDetails?.instructions ? `
+                      <div class="detail-row">
+                          <span class="detail-label">Instructions:</span>
+                          <span>${meetingDetails.instructions}</span>
+                      </div>
+                      ` : ''}
+                  </div>
+                  <p>Please respond to this booking request at your earliest convenience.</p>
+                  <center>
+                      <a href="http://localhost:5173/login" class="cta-button">
+                          View Booking in Dashboard
+                      </a>
+                  </center>
+                  <p>Best regards,<br>The StudyHub Team</p>
+                  <div class="footer">
+                      <p>© ${new Date().getFullYear()} StudyHub. All rights reserved.</p>
+                      <p>If you didn't request this booking, please <a href="mailto:support@studyhub.com">contact support</a>.</p>
+                  </div>
+              </div>
+          </div>
+      </body>
+      </html>
+      `
     );
 
     res.status(201).json({
@@ -95,22 +167,21 @@ export const createBooking = async (req, res) => {
         tutor: {
           id: tutor._id,
           name: `${tutor.firstName} ${tutor.lastName}`,
-          email: tutor.email
+          email: tutor.email,
         },
         subject,
         date,
         time: `${timeSlot.start}-${timeSlot.end}`,
         status: "pending",
-        createdAt: newBooking.createdAt
-      }
+        createdAt: newBooking.createdAt,
+      },
     });
-
   } catch (error) {
     console.error("Booking creation error:", error);
     res.status(500).json({
       success: false,
       message: "Internal server error while creating booking",
-      error: error.message
+      error: error.message,
     });
   }
 };
