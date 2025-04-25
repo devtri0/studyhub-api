@@ -56,8 +56,8 @@ export const registerUser = async (req, res) => {
 
     // Send verification email
 try {
-    const emailSubject = "Verify Your TutorConnect Account";
-    const verificationUrl = `${process.env.BACKEND_URL || 'https://yourfrontend.com'}/verify-email?token=${verificationToken}`;
+    const emailSubject = "Verify Your TutorKonnet Account";
+    const verificationUrl = `${process.env.BACKEND_URL || 'http://localhost:5173'}/verify-email?token=${verificationToken}`;
     
     const emailBody = `
     <!DOCTYPE html>
@@ -111,11 +111,11 @@ try {
     </head>
     <body>
       <div class="header">
-        <img src="https://yourlogo.com/logo.png" alt="TutorConnect Logo" class="logo">
+        <img src="https://res.cloudinary.com/dpchmidab/image/upload/v1745497836/TutorKonnet2b7fff_asdqeg.png" alt="TutorKonnet Logo" class="logo">
       </div>
       
       <div class="content">
-        <h2>Welcome to TutorConnect, ${newUser.firstName}!</h2>
+        <h2>Welcome to TutorKonnet, ${newUser.firstName}!</h2>
         <p>Thank you for creating an account. Please verify your email address to get started.</p>
         
         <a href="${verificationUrl}" class="button">Verify Email Address</a>
@@ -127,11 +127,11 @@ try {
       </div>
       
       <div class="footer">
-        <p>TutorConnect - Connecting students and tutors</p>
-        <p>© ${new Date().getFullYear()} TutorConnect. All rights reserved.</p>
+        <p>TutorKonnet - Connecting students and tutors</p>
+        <p>© ${new Date().getFullYear()} TutorKonnet. All rights reserved.</p>
         <p>
-          <a href="https://tutorconnect.com/privacy" style="color: #777; text-decoration: none;">Privacy Policy</a> | 
-          <a href="https://tutorconnect.com/terms" style="color: #777; text-decoration: none;">Terms of Service</a>
+          <a href="https://tutorKonnet.com/privacy" style="color: #777; text-decoration: none;">Privacy Policy</a> | 
+          <a href="https://tutorKonnet.com/terms" style="color: #777; text-decoration: none;">Terms of Service</a>
         </p>
       </div>
     </body>
@@ -200,14 +200,14 @@ export const verifyEmail = async (req, res) => {
 
     // Send welcome email after verification
     try {
-      const emailSubject = "Welcome to TutorConnect!";
+      const emailSubject = "Welcome to TutorKonnet!";
       const emailBody = `
       <!DOCTYPE html>
       <html>
       <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Welcome to TutorConnect</title>
+        <title>Welcome to TutorKonnet</title>
         <style>
           body { font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 0; }
           .container { max-width: 600px; background-color: #ffffff; margin: 20px auto; padding: 20px; border-radius: 8px; box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1); }
@@ -219,17 +219,17 @@ export const verifyEmail = async (req, res) => {
       </head>
       <body>
         <div class="container">
-          <div class="header">Welcome to TutorConnect, ${user.firstName}!</div>
+          <div class="header">Welcome to TutorKonnet, ${user.firstName}!</div>
           <div class="content">
             <h2>Your account is now verified!</h2>
-            <p>You can now enjoy all the features of TutorConnect.</p>
+            <p>You can now enjoy all the features of TutorKonnet.</p>
             ${
               user.role === "tutor"
                 ? `
             <p>As a tutor, you can:</p>
             <ul>
               <li>Create your tutor profile</li>
-              <li>Connect with students</li>
+              <li>Konnet with students</li>
               <li>Schedule tutoring sessions</li>
             </ul>
             `

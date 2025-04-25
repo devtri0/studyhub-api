@@ -87,31 +87,43 @@ export const getFullTutorInfo = async (req, res) => {
 
 export const searchTutors = async (req, res) => {
   try {
-    const { subject, availability, rating } = req.query;
+    const { subject, level, availability, rating } = req.query;
 
-    // get all tutors
-    const tutors = await User.find({ role: "tutor", isVerified: true }).lean();
+    // Build the base query for tutors
+    const baseQuery = { 
+      role: "tutor", 
+      isVerified: true 
+    };
+
+    // Get all verified tutors
+    const tutors = await User.find(baseQuery).lean();
 
     const filteredTutors = [];
 
     for (const tutor of tutors) {
-      const [profile, availabilityDoc] = await Promise.all([
+      const [profile, availabilityDoc, style] = await Promise.all([
         tutorProfile.findOne({ user: tutor._id }).lean(),
         TutorAvailability.findOne({ user: tutor._id }).lean(),
+        TutorStyle.findOne({ user: tutor._id }).lean()
       ]);
 
-      if (!profile || !availabilityDoc) continue;
+      // Skip if essential documents are missing
+      if (!profile || !availabilityDoc || !style) continue;
 
-      // Filter by subject
-      if (subject && !profile.specialization.includes(subject)) continue;
+      // Filter by subject and level
+      if (subject || level) {
+        const hasMatchingSubject = style.subjects.some(sub => {
+          const subjectMatch = subject ? sub.name === subject : true;
+          const levelMatch = level ? sub.level === level : true;
+          return subjectMatch && levelMatch;
+        });
 
-      // Filter by rating
-      if (rating && profile.ratingsAverage < parseFloat(rating)) continue;
+        if (!hasMatchingSubject) continue;
+      }
 
       // Filter by availability
       if (availability) {
         const general = availabilityDoc.generalAvailability;
-
         const timeMap = {
           morning: { start: "6:00 AM", end: "12:00 PM" },
           afternoon: { start: "12:00 PM", end: "6:00 PM" },
@@ -125,33 +137,87 @@ export const searchTutors = async (req, res) => {
         if (!startTime || !isTimeInRange(startTime, range.start, range.end)) continue;
       }
 
+      // Calculate matching score for sorting (optional)
+      const matchingScore = calculateMatchingScore(profile, style, { subject, level });
+
       filteredTutors.push({
         ...tutor,
         profile,
         availability: availabilityDoc,
+        style,
+        matchingScore
       });
     }
 
-    res.status(200).json({ count: filteredTutors.length, tutors: filteredTutors });
+    // Sort by matching score (highest first)
+    filteredTutors.sort((a, b) => b.matchingScore - a.matchingScore);
+
+    res.status(200).json({ 
+      success: true,
+      count: filteredTutors.length, 
+      tutors: filteredTutors 
+    });
 
   } catch (err) {
     console.error("Error in searchTutors:", err.message);
-    res.status(500).json({ message: "Server error while searching tutors" });
+    res.status(500).json({ 
+      success: false,
+      message: "Server error while searching tutors",
+      error: err.message 
+    });
   }
 };
 
-// check if time is within range
-function isTimeInRange(time, start, end) {
-  const to24 = t => {
-    const [hour, minPart] = t.split(":");
-    const [min, mer] = minPart.split(" ");
-    let h = parseInt(hour);
-    if (mer.toLowerCase() === "pm" && h !== 12) h += 12;
-    if (mer.toLowerCase() === "am" && h === 12) h = 0;
-    return h * 60 + parseInt(min);
-  };
-
-  const t = to24(time);
-  return t >= to24(start) && t <= to24(end);
+// Helper function to calculate matching score
+function calculateMatchingScore(profile, style, filters) {
+  let score = 0;
+  
+  // Higher score for exact subject matches
+  if (filters.subject) {
+    const subjectMatch = style.subjects.some(s => s.name === filters.subject);
+    if (subjectMatch) score += 2;
+  }
+  
+  // Higher score for exact level matches
+  if (filters.level) {
+    const levelMatch = style.subjects.some(s => s.level === filters.level);
+    if (levelMatch) score += 1;
+  }
+  
+  // Additional points for ratings
+  if (profile.ratingsAverage) {
+    score += profile.ratingsAverage;
+  }
+  
+  return score;
 }
 
+// check if time is within range
+function isTimeInRange(time, start, end) {
+  const toMinutes = t => {
+    if (!t) return 0;
+    
+    // Handle both "HH:MM AM/PM" and "HH:MM" formats
+    const [timePart, period] = t.split(' ');
+    const [hours, minutes] = timePart.split(':').map(Number);
+    
+    let totalMinutes = hours * 60 + minutes;
+    
+    if (period) {
+      if (period.toLowerCase() === 'pm' && hours !== 12) {
+        totalMinutes += 12 * 60;
+      }
+      if (period.toLowerCase() === 'am' && hours === 12) {
+        totalMinutes -= 12 * 60;
+      }
+    }
+    
+    return totalMinutes;
+  };
+
+  const timeMinutes = toMinutes(time);
+  const startMinutes = toMinutes(start);
+  const endMinutes = toMinutes(end);
+
+  return timeMinutes >= startMinutes && timeMinutes <= endMinutes;
+}
