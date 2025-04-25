@@ -333,3 +333,44 @@ export const updateBookingStatus = async (req, res) => {
   //     res.status(500).json({ error: error.toString() });
   //   }
   // };
+
+  export const getStudentBookings = async (req, res) => {
+    try {
+      console.log('Filtering by student ID:', req.params.studentId);
+  
+      const allBookings = await Booking.find()
+        .populate('student tutor')
+        .sort({ date: -1, 'timeSlot.start': 1 })
+        .lean();
+  
+      console.log('All Bookings:', allBookings);
+  
+      const studentBookings = allBookings.filter(b =>
+        b.student && b.student._id.toString() === req.params.studentId
+      );
+  
+      const categorizedBookings = {
+        upcoming: studentBookings.filter(b =>
+          new Date(b.date) >= new Date() && 
+          b.status !== 'completed' && 
+          b.status !== 'rejected'
+        ),
+        completed: studentBookings.filter(b => b.status === 'completed'),
+        pending: studentBookings.filter(b => b.status === 'pending'),
+        rejected: studentBookings.filter(b => b.status === 'rejected')
+      };
+  
+      res.status(200).json({
+        success: true,
+        count: studentBookings.length,
+        data: categorizedBookings
+      });
+    } catch (error) {
+      console.error('Error fetching student bookings:', error);
+      res.status(500).json({ 
+        success: false,
+        error: 'Server error while fetching bookings' 
+      });
+    }
+  };
+  

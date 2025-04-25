@@ -5,6 +5,7 @@ import {
 } from "../middleware/auth.js";
 import {
   createBooking,
+  getStudentBookings,
   getUserBookings,
   updateBookingStatus,
 } from "../controllers/bookingController.js";
@@ -29,6 +30,8 @@ bookingRouter.patch(
 );
 
 // bookingRouter.get("/tutor/bookings/:Id", isAuthenticated, getTutorBookings);
+
+bookingRouter.get("/bookings/student/:studentId", getStudentBookings);
 
 // Get user's bookings
 bookingRouter.get("/bookings", isAuthenticated, getUserBookings);
