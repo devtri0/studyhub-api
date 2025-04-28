@@ -143,7 +143,7 @@ export const createBooking = async (req, res) => {
                   </div>
                   <p>Please respond to this booking request at your earliest convenience.</p>
                   <center>
-                      <a href="http://localhost:5173/login" class="cta-button">
+                      <a href="https://tutorkonnet.netlify.app/login" class="cta-button">
                           View Booking in Dashboard
                       </a>
                   </center>
